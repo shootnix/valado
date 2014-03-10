@@ -12,11 +12,13 @@ public class Valado : GLib.Object {
 
         stdout.printf("Hello\n");
         Storage storage = new Storage("mydb.db");
-        storage.get_tasks_list(SHOW_RESOLVED_TASKS);
+        string[] tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
 
-        //for (int i=0; i<tasks.length; i++) {
-        //    stdout.printf("Task %s: %s\n", i.to_string(), tasks[i]);
-        //}
+        for (int i=0; i<tasks.length; i++) {
+            stdout.printf("Task %s: %s\n", i.to_string(), tasks[i]);
+        }
+
+        storage.resolve_task(3);
     }
 }
 
@@ -51,22 +53,64 @@ public class Storage : GLib.Object {
         }
     }
 
-    /*private int cb(int n_columns, string[] values, string[] column_names) {
-        this.tasks.append(values[1]);
-        for (int i=0; i<n_columns; i++) {
-            stdout.printf("%s = %s\n", column_names[i], values[i]);
+    public string[] get_tasks_list(int show_resolved) {
+        Statement stmt;
+        string[] tasks = {};
+
+        string sql = """
+            SELECT task FROM `tasks`
+            ORDER BY created
+        """;
+        int rc = this.db.prepare_v2(sql, sql.length, out stmt);
+        if (rc != Sqlite.OK) {
+            stderr.printf("Error while selecting data...");
+
+        }
+        int cols = stmt.column_count();
+        while (stmt.step() == Sqlite.ROW) {
+            tasks += stmt.column_text(0);
         }
 
-        return 0;
-    }*/
+        return tasks;
+    }
 
-    public List<string> get_tasks_list(int show_resolved) {
-        //string[] tasks = {"Task1", "Task2"};
-        string sql_stmt = """
-            SELECT * FROM tasks
-        """;
-        this.db.exec(sql_stmt, cb, null);
+    public void create_task(string task) {
+        string errmsg;
+        string sql = """
+            INSERT INTO tasks (task)
+            VALUES ("%s");
+        """.printf(task);
 
-        return this.tasks;
+        int rc = this.db.exec(sql, null, out errmsg);
+        if (rc != Sqlite.OK) {
+            stderr.printf("Database Error: %s\n", errmsg);
+        }
+    }
+
+    public void delete_task(int id) {
+        string errmsg;
+        string sql = """
+            DELETE FROM tasks
+            WHERE
+                id = %s
+        """.printf(id.to_string());
+
+        int rc = this.db.exec(sql, null, out errmsg);
+        if (rc != Sqlite.OK) {
+            stderr.printf("Database Error: %s\n", errmsg);
+        }
+    }
+
+    public void resolve_task(int id) {
+        string errmsg;
+        string sql = """
+            UPDATE tasks SET resolved = CURRENT_DATE
+            WHERE
+                id = %s
+        """.printf(id.to_string());
+        int rc = this.db.exec(sql, null, out errmsg);
+        if (rc != Sqlite.OK) {
+            stderr.printf("Database Error: %s\n", errmsg);
+        }
     }
 }
