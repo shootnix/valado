@@ -10,7 +10,7 @@ public class Valado : GLib.Object {
         string command  = args[1];
         string argument = args[2];
 
-        int SHOW_RESOLVED_TASKS = 1;
+        int SHOW_RESOLVED_TASKS = 0;
 
         GLib.stdout.printf("\n");
 
@@ -231,6 +231,11 @@ public class Valado : GLib.Object {
                 print_tasks_list(tasks);
                 break;
 
+            case "-all":
+                string[] tasks = storage.get_tasks_list(1);
+                print_tasks_list(tasks);
+                break;
+
             default:
                 string[] tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
                 print_tasks_list(tasks);
@@ -248,6 +253,7 @@ public class Valado : GLib.Object {
         GLib.stdout.printf("\t-m:\t Mark Task\n");
         GLib.stdout.printf("\t-r:\t Resolve Task\n");
         GLib.stdout.printf("\t-ur:\t Unresolve Task\n");
+        GLib.stdout.printf("\t-all:\t Show all tasks\n");
 
         GLib.stdout.printf("\n");
     }
@@ -272,12 +278,16 @@ public class Storage : GLib.Object {
 
     public Storage(string dbfile) {
         int rc;
+        string home = GLib.Environment.get_home_dir();
+        string workdir = home + "/.valado";
+        GLib.DirUtils.create_with_parents(workdir, 0777);
+        GLib.FileUtils.chmod(workdir, 0777);
+        string dbfile_path = workdir + "/" + dbfile;
 
-
-        if (!FileUtils.test(dbfile, FileTest.IS_REGULAR)) {
+        if (!FileUtils.test(dbfile_path, FileTest.IS_REGULAR)) {
             // create new database
-            GLib.stdout.printf("Storage: creating a new database `%s`...\n", dbfile);
-            rc = Database.open(dbfile, out this.db);
+            GLib.stdout.printf("Storage: creating a new database `%s`...\n", dbfile_path);
+            rc = Database.open(dbfile_path, out this.db);
             string sql_stmt = """
                 CREATE TABLE `tasks` (
                     id        integer NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -288,12 +298,16 @@ public class Storage : GLib.Object {
                 )
             """;
             rc = this.db.exec(sql_stmt);
+            if (rc != Sqlite.OK) {
+                GLib.stderr.printf("Cannot Create a database file\n");
+                GLib.Process.exit(0);
+            }
         }
         else {
             // use existed databse
-            rc = Database.open(dbfile, out this.db);
+            rc = Database.open(dbfile_path, out this.db);
             if (rc != Sqlite.OK) {
-                GLib.stderr.printf("Can't open database `%s`", dbfile);
+                GLib.stderr.printf("Can't open database `%s`", dbfile_path);
             }
         }
     }
@@ -302,12 +316,12 @@ public class Storage : GLib.Object {
         Statement stmt;
         string[] tasks = {};
 
-        string sql = """
-            SELECT task, resolved FROM `tasks`
-            --WHERE
-            --    resolved IS NULL
-            ORDER BY created, priority desc
-        """;
+        string sql = """SELECT task, resolved FROM tasks""";
+        if (show_resolved == 0) {
+            sql += " WHERE resolved IS NULL";
+        }
+        sql += " ORDER BY created, priority DESC";
+
         int rc = this.db.prepare_v2(sql, sql.length, out stmt);
         if (rc != Sqlite.OK) {
             GLib.stderr.printf("Error while selecting data...");
@@ -319,7 +333,6 @@ public class Storage : GLib.Object {
             if (resolved_date != null) {
                 task = "<" + task + ">";
             }
-            //tasks += stmt.column_text(0);
             tasks += task;
         }
 
