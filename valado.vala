@@ -320,7 +320,7 @@ public class Storage : GLib.Object {
         if (show_resolved == 0) {
             sql += " WHERE resolved IS NULL";
         }
-        sql += " ORDER BY created, priority DESC";
+        sql += " ORDER BY priority DESC";
 
         int rc = this.db.prepare_v2(sql, sql.length, out stmt);
         if (rc != Sqlite.OK) {
@@ -331,7 +331,7 @@ public class Storage : GLib.Object {
             string task = stmt.column_text(0);
             string resolved_date = stmt.column_text(1);
             if (resolved_date != null) {
-                task = "<" + task + ">";
+                task = "\t" + task;
             }
             tasks += task;
         }
@@ -464,7 +464,7 @@ public class Storage : GLib.Object {
         Regex regex;
 
         try {
-            regex = new Regex("""^\%s\s+|\%s\s+$""".printf(marker, marker));
+            regex = new Regex("""\%s""".printf(marker));
         }
         catch(RegexError e) {
             GLib.stdout.printf("ERROR: %s\n", e.message);
