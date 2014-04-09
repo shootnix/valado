@@ -90,12 +90,6 @@ public class Valado : GLib.Object {
                     break;
                 }
 
-                //if (task_num > tasks.length-1) {
-                //    GLib.stdout.printf("[error]: Not found task with number #%s\n", task_num.to_string());
-                //    print_tasks_list(tasks);
-                //    break;
-                //}
-
                 storage.task_priority_down(id);
                 tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
                 print_tasks_list(tasks);
@@ -134,7 +128,13 @@ public class Valado : GLib.Object {
                 }
 
                 string marker = argument;
+                if (args[3] == null) {
+                    stdout.printf("[error]: Need task id\n");
+                    print_usage();
+                    break;
+                }
                 int id = int.parse(args[3]);
+
                 if (id <= 0) {
                     GLib.stdout.printf("[error]: Need a Natural Number (starts from 0)\n");
                     print_usage();
@@ -156,6 +156,11 @@ public class Valado : GLib.Object {
                 }
 
                 string marker = argument;
+                if (args[3] == null) {
+                    stdout.printf("[error]: Need task id\n");
+                    print_usage();
+                    break;
+                }
                 int id = int.parse(args[3]);
                 if (id <= 0) {
                     GLib.stdout.printf("[error]: Need a Natural Number (starts from 0)\n");
