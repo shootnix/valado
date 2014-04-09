@@ -23,6 +23,12 @@ public class Valado : GLib.Object {
         GLib.stdout.printf("\n");
 
         switch(command) {
+            case "-g":
+                int id = int.parse(argument);
+                Task task = storage.get_task(id);
+                stdout.printf("TASK: %s\n", task.task);
+                break;
+
             case "-h":
                 print_usage();
                 break;
@@ -459,7 +465,7 @@ public class Storage : GLib.Object {
         Regex regex;
 
         try {
-            regex = new Regex("""\%s""".printf(marker));
+            regex = new Regex("""\%s\s+""".printf(marker));
         }
         catch(RegexError e) {
             GLib.stdout.printf("ERROR: %s\n", e.message);
@@ -584,22 +590,14 @@ public class Storage : GLib.Object {
 
         }
 
-        if (stmt.step() != Sqlite.ROW) {
-            Task t = new Task(0, "");
-            tasks += t;
-        }
-        else {
-            while (stmt.step() == Sqlite.ROW) {
-                string task_str = stmt.column_text(0);
-                if (task_str == "") {
-                    stdout.printf("NULL!");
-                }
-
-                stdout.printf("Task str: %s\n", task_str);
-
-                Task t = new Task(id, task_str);
-                tasks += t;
+        while (stmt.step() == Sqlite.ROW) {
+            string task_str = stmt.column_text(0);
+            if (task_str == "") {
+                stdout.printf("NULL!");
             }
+
+            Task t = new Task(id, task_str);
+            tasks += t;
         }
 
         if (tasks.length == 0) {
