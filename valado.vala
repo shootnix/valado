@@ -365,8 +365,6 @@ public class Storage : GLib.Object {
                 id = %d
         """.printf(id);
 
-        stdout.printf("SQL: %s\n", sql);
-
         int rc = this.db.exec(sql, null, out errmsg);
         if (rc != Sqlite.OK) {
             GLib.stderr.printf("Database Error: %s\n", errmsg);
