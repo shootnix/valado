@@ -13,27 +13,27 @@ USAGE
     $ valado -add 'Create a new task'
 
     # Mark task as a resolved:
-    $ valado -r [number]
+    $ valado -r [#id]
 
     # Mark task as an unresolved:
-    $ valado -ur [number]
+    $ valado -ur [#id]
 
-    # Delete task
-    $ valado -d [number]
+    # Delete tasks:
+    $ valado -d [#id]
 
     # Priority up:
-    $ valado -up [number]
+    $ valado -up [#id]
 
     # Priority down:
-    $ valado -down [number]
+    $ valado -down [#id]
 
     # Mark task:
-    $ valado -m [number]
+    $ valado -m [*marker*] [#id]
 
     # Unmark task:
-    $ valado -um [number]
+    $ valado -um [*marker*] [#id]
 
 LICENSE
 =======
 
-BSD.
+This is free software at all. Good luck ;-)
