@@ -1,9 +1,17 @@
 // Compile: $ valac --pkg sqlite3 valado.vala
 using Sqlite;
 
+public class Task : GLib.Object {
+    public int id;
+    public string task;
+
+    public Task(int id=0, string task="") {
+        this.id = id;
+        this.task = task;
+    }
+}
 
 public class Valado : GLib.Object {
-
 
     public static void main(string[] args) {
         Storage storage = new Storage("tasks.db");
@@ -25,9 +33,9 @@ public class Valado : GLib.Object {
                     print_usage();
                     break;
                 }
-                string task = argument;
-                storage.create_task(task);
-                string[] tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
+                string task_string = argument;
+                storage.create_task(task_string);
+                Task[] tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
                 print_tasks_list(tasks);
                 break;
 
@@ -38,26 +46,21 @@ public class Valado : GLib.Object {
                     break;
                 }
 
-                int task_num = int.parse(argument);
-                string[] tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
+
+                Task[] tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
                 if (tasks.length == 0) {
                     GLib.stdout.printf("The List is empty\n");
                     break;
                 }
 
-                if (task_num < 0) {
+                int id = int.parse(argument);
+                if (id <= 0) {
                     GLib.stdout.printf("[error]: Need a Natural Number (starts from 0)\n");
                     print_usage();
                     break;
                 }
 
-                if (task_num > tasks.length-1) {
-                    GLib.stdout.printf("[error]: Not found task with number #%s\n", task_num.to_string());
-                    print_tasks_list(tasks);
-                    break;
-                }
-
-                storage.task_priority_up(tasks[task_num]);
+                storage.task_priority_up(id);
                 tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
                 print_tasks_list(tasks);
                 break;
@@ -68,26 +71,26 @@ public class Valado : GLib.Object {
                     print_usage();
                     break;
                 }
-                int task_num = int.parse(argument);
-                string[] tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
+                int id = int.parse(argument);
+                Task[] tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
                 if (tasks.length == 0) {
                     GLib.stdout.printf("The List is empty\n");
                     break;
                 }
 
-                if (task_num < 0) {
+                if (id <= 0) {
                     GLib.stdout.printf("[error]: Need a Natural Number (starts from 0)\n");
                     print_usage();
                     break;
                 }
 
-                if (task_num > tasks.length-1) {
-                    GLib.stdout.printf("[error]: Not found task with number #%s\n", task_num.to_string());
-                    print_tasks_list(tasks);
-                    break;
-                }
+                //if (task_num > tasks.length-1) {
+                //    GLib.stdout.printf("[error]: Not found task with number #%s\n", task_num.to_string());
+                //    print_tasks_list(tasks);
+                //    break;
+                //}
 
-                storage.task_priority_down(tasks[task_num]);
+                storage.task_priority_down(id);
                 tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
                 print_tasks_list(tasks);
                 break;
@@ -99,26 +102,20 @@ public class Valado : GLib.Object {
                     break;
                 }
 
-                int task_num = int.parse(argument);
-                string[] tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
+                int id = int.parse(argument);
+                Task[] tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
                 if (tasks.length == 0) {
                     GLib.stdout.printf("The List is empty\n");
                     break;
                 }
 
-                if (task_num < 0) {
+                if (id <= 0) {
                     GLib.stdout.printf("[error]: Need a Natural Number (starts from 0)\n");
                     print_usage();
                     break;
                 }
 
-                if (task_num > tasks.length-1) {
-                    GLib.stdout.printf("[error]: Not found task with number #%s\n", task_num.to_string());
-                    print_tasks_list(tasks);
-                    break;
-                }
-
-                storage.delete_task(tasks[task_num]);
+                storage.delete_task(id);
                 tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
                 print_tasks_list(tasks);
                 break;
@@ -130,24 +127,16 @@ public class Valado : GLib.Object {
                     break;
                 }
 
-                int task_num = int.parse(argument);
-                if (task_num < 0) {
+                string marker = argument;
+                int id = int.parse(args[3]);
+                if (id <= 0) {
                     GLib.stdout.printf("[error]: Need a Natural Number (starts from 0)\n");
                     print_usage();
                     break;
                 }
-                string[] tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
-                if (task_num > tasks.length-1) {
-                    GLib.stdout.printf("[error]: Not found task with number #%s\n", task_num.to_string());
-                    print_tasks_list(tasks);
-                    break;
-                }
+                Task[] tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
 
-                string marker = args[3];
-                if (marker == null) {
-                    marker = "*";
-                }
-                storage.task_mark(tasks[task_num], marker);
+                storage.task_mark(id, marker);
                 tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
                 print_tasks_list(tasks);
 
@@ -160,24 +149,16 @@ public class Valado : GLib.Object {
                     break;
                 }
 
-                int task_num = int.parse(argument);
-                if (task_num < 0) {
+                string marker = argument;
+                int id = int.parse(args[3]);
+                if (id <= 0) {
                     GLib.stdout.printf("[error]: Need a Natural Number (starts from 0)\n");
                     print_usage();
                     break;
                 }
-                string[] tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
-                if (task_num > tasks.length-1) {
-                    GLib.stdout.printf("[error]: Not found task with number #%s\n", task_num.to_string());
-                    print_tasks_list(tasks);
-                    break;
-                }
+                Task[] tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
 
-                string marker = args[3];
-                if (marker == null) {
-                    marker = "*";
-                }
-                storage.task_unmark(tasks[task_num], marker);
+                storage.task_unmark(id, marker);
                 tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
                 print_tasks_list(tasks);
 
@@ -190,19 +171,15 @@ public class Valado : GLib.Object {
                     break;
                 }
 
-                int task_num = int.parse(argument);
-                if (task_num < 0) {
+                int id = int.parse(argument);
+                if (id <= 0) {
                     GLib.stdout.printf("[error]: Need a Natural Number (starts from 0)\n");
                     print_usage();
                     break;
                 }
-                string[] tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
-                if (task_num > tasks.length-1) {
-                    GLib.stdout.printf("[error]: Not found task with number #%s\n", task_num.to_string());
-                    print_tasks_list(tasks);
-                    break;
-                }
-                storage.resolve_task(tasks[task_num]);
+                Task[] tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
+
+                storage.resolve_task(id);
                 tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
                 print_tasks_list(tasks);
                 break;
@@ -214,58 +191,75 @@ public class Valado : GLib.Object {
                     break;
                 }
 
-                int task_num = int.parse(argument);
-                if (task_num < 0) {
+                int id = int.parse(argument);
+                if (id <= 0) {
                     GLib.stdout.printf("[error]: Need a Natural Number (starts from 0)\n");
                     print_usage();
                     break;
                 }
-                string[] tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
-                if (task_num > tasks.length-1) {
-                    GLib.stdout.printf("[error]: Not found task with number #%s\n", task_num.to_string());
-                    print_tasks_list(tasks);
-                    break;
-                }
-                storage.unresolve_task(tasks[task_num]);
+                Task[] tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
+
+                storage.unresolve_task(id);
                 tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
                 print_tasks_list(tasks);
                 break;
 
             case "-all":
-                string[] tasks = storage.get_tasks_list(1);
+                Task[] tasks = storage.get_tasks_list(1);
                 print_tasks_list(tasks);
                 break;
 
             default:
-                string[] tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
+                Task[] tasks = storage.get_tasks_list(SHOW_RESOLVED_TASKS);
                 print_tasks_list(tasks);
                 break;
         }
     }
 
     public static void print_usage() {
-        GLib.stdout.printf("Usage:\n");
-        GLib.stdout.printf("\t-h:\t help\n");
-        GLib.stdout.printf("\t-add:\t New task\n");
-        GLib.stdout.printf("\t-up:\t Priority Up\n");
-        GLib.stdout.printf("\t-down:\t Priority Down\n");
-        GLib.stdout.printf("\t-d:\t Delete Task\n");
-        GLib.stdout.printf("\t-m:\t Mark Task\n");
-        GLib.stdout.printf("\t-r:\t Resolve Task\n");
-        GLib.stdout.printf("\t-ur:\t Unresolve Task\n");
-        GLib.stdout.printf("\t-all:\t Show all tasks\n");
+        string usage_info = """
+        # Show all tasks:
+        $ valado
 
+        # Add new task:
+        $ valado -add 'Create a new task'
+
+        # Mark task as a resolved:
+        $ valado -r [id]
+
+        # Mark task as an unresolved:
+        $ valado -ur [id]
+
+        # Delete task
+        $ valado -d [id]
+
+        # Priority up:
+        $ valado -up [id]
+
+        # Priority down:
+        $ valado -down [id]
+
+        # Mark task:
+        $ valado -m [marker] [id]
+
+        # Unmark task:
+        $ valado -um [marker] [id]
+""";
+
+        GLib.stdout.printf("Usage:");
+        GLib.stdout.printf(usage_info);
         GLib.stdout.printf("\n");
     }
 
-    public static void print_tasks_list(string[] tasks) {
+    public static void print_tasks_list(Task[] tasks) {
         if (tasks.length == 0) {
             GLib.stdout.printf("The List is empty\n");
         }
         else {
             GLib.stdout.printf("Current tasks:\n\n");
             for (int i=0; i<tasks.length; i++) {
-                GLib.stdout.printf("\t%s: %s\n", i.to_string(), tasks[i]);
+                //Storage.Task t = tasks[i];
+                GLib.stdout.printf("\t%s: %s\n", tasks[i].id.to_string(), tasks[i].task);
             }
             GLib.stdout.printf("\n\n");
         }
@@ -312,11 +306,11 @@ public class Storage : GLib.Object {
         }
     }
 
-    public string[] get_tasks_list(int show_resolved) {
+    public Task[] get_tasks_list(int show_resolved) {
         Statement stmt;
-        string[] tasks = {};
+        Task[] tasks = {};
 
-        string sql = """SELECT task, resolved FROM tasks""";
+        string sql = """SELECT id, task, resolved FROM tasks""";
         if (show_resolved == 0) {
             sql += " WHERE resolved IS NULL";
         }
@@ -328,12 +322,14 @@ public class Storage : GLib.Object {
 
         }
         while (stmt.step() == Sqlite.ROW) {
-            string task = stmt.column_text(0);
-            string resolved_date = stmt.column_text(1);
+            string task_str = stmt.column_text(1);
+            string resolved_date = stmt.column_text(2);
             if (resolved_date != null) {
-                task = "\t" + task;
+                task_str = "\t" + task_str;
             }
-            tasks += task;
+            int id = int.parse(stmt.column_text(0));
+            Task t = new Task(id, task_str);
+            tasks += t;
         }
 
         return tasks;
@@ -360,15 +356,16 @@ public class Storage : GLib.Object {
         return true;
     }
 
-    public bool delete_task(string task) {
+    public bool delete_task(int id) {
         string errmsg;
-        string stripped_task = this.strip_task(task);
 
         string sql = """
             DELETE FROM tasks
             WHERE
-                task = "%s"
-        """.printf(stripped_task);
+                id = %d
+        """.printf(id);
+
+        stdout.printf("SQL: %s\n", sql);
 
         int rc = this.db.exec(sql, null, out errmsg);
         if (rc != Sqlite.OK) {
@@ -402,22 +399,22 @@ public class Storage : GLib.Object {
         return stripped;
     }
 
-    public void resolve_task(string task) {
+    public void resolve_task(int id) {
         string errmsg;
         string sql = """
             UPDATE tasks SET resolved = CURRENT_DATE
             WHERE
-                task = "%s"
-        """.printf(this.strip_task(task));
+                id = %d
+        """.printf(id);
         int rc = this.db.exec(sql, null, out errmsg);
         if (rc != Sqlite.OK) {
             GLib.stderr.printf("Database Error: %s\n", errmsg);
         }
     }
 
-    public int task_priority_up(string task) {
+    public int task_priority_up(int id) {
         string errmsg;
-        int current_priority = this.get_task_priority(task);
+        int current_priority = this.get_task_priority(id);
         if (current_priority >= this.MAX_PRIORITY_VAL) {
             return 0;
         }
@@ -425,8 +422,8 @@ public class Storage : GLib.Object {
         string sql = """
             UPDATE tasks SET priority = priority+1
             WHERE
-                task = "%s"
-        """.printf(this.strip_task(task));
+                id = %d
+        """.printf(id);
 
         int rc = this.db.exec(sql, null, out errmsg);
         if (rc != Sqlite.OK) {
@@ -437,9 +434,9 @@ public class Storage : GLib.Object {
         return 1;
     }
 
-    public int task_priority_down(string task) {
+    public int task_priority_down(int id) {
         string errmsg;
-        int current_priority = this.get_task_priority(task);
+        int current_priority = this.get_task_priority(id);
         if (current_priority == 0) {
             return 0;
         }
@@ -447,8 +444,8 @@ public class Storage : GLib.Object {
         string sql = """
             UPDATE tasks SET priority = priority - 1
             WHERE
-                task = "%s"
-        """.printf(this.strip_task(task));
+                id = %d
+        """.printf(id);
 
         int rc = this.db.exec(sql, null, out errmsg);
         if (rc != Sqlite.OK) {
@@ -459,7 +456,7 @@ public class Storage : GLib.Object {
         return 1;
     }
 
-    public bool task_unmark(string task, string marker) {
+    public bool task_unmark(int id, string marker) {
         string stripped = "";
         Regex regex;
 
@@ -471,19 +468,28 @@ public class Storage : GLib.Object {
             return false;
         }
 
+        Task t = get_task(id);
+        if (t.task == "") {
+            return false;
+        }
+
         try {
-            stripped = regex.replace(task, task.length, 0, "");
+            stripped = regex.replace(t.task, t.task.length, 0, "");
         }
         catch(GLib.RegexError e) {
             GLib.stdout.printf("ERROR: %s\n", e.message);
             return false;
         }
 
+        if (stripped == "") {
+            return false;
+        }
+
         string errmsg;
         string sql = """
             UPDATE tasks SET task = "%s"
-            WHERE task = "%s"
-        """.printf(stripped, task);
+            WHERE id = %d
+        """.printf(stripped, id);
 
         int rc = this.db.exec(sql, null, out errmsg);
         if (rc != Sqlite.OK) {
@@ -494,13 +500,13 @@ public class Storage : GLib.Object {
         return true;
     }
 
-    public bool unresolve_task(string task) {
+    public bool unresolve_task(int id) {
         string errmsg;
         string sql = """
             UPDATE tasks SET resolved = NULL
             WHERE
-                task = "%s"
-        """.printf(this.strip_task(task));
+                id = %d
+        """.printf(id);
 
         int rc = this.db.exec(sql, null, out errmsg);
         if (rc != Sqlite.OK) {
@@ -511,13 +517,13 @@ public class Storage : GLib.Object {
         return true;
     }
 
-    public bool task_mark(string task, string marker) {
+    public bool task_mark(int id, string marker) {
         string errmsg;
         string sql = """
             UPDATE tasks SET task = "%s " || task
             WHERE
-                task = "%s"
-        """.printf(marker, this.strip_task(task));
+                id = %d
+        """.printf(marker, id);
 
         int rc = this.db.exec(sql, null, out errmsg);
         if (rc != Sqlite.OK) {
@@ -528,15 +534,15 @@ public class Storage : GLib.Object {
         return true;
     }
 
-    private int get_task_priority(string task) {
+    private int get_task_priority(int id) {
         Statement stmt;
         int priority = 0;
 
         string sql = """
             SELECT priority FROM tasks
             WHERE
-                task = "%s"
-        """.printf(this.strip_task(task));
+                id = %d
+        """.printf(id);
 
         int rc = this.db.prepare_v2(sql, sql.length, out stmt);
         if (rc != Sqlite.OK) {
@@ -553,7 +559,7 @@ public class Storage : GLib.Object {
     private bool is_task_exists(string task) {
         Statement stmt;
 
-        string sql = """SELECT id FROM tasks WHERE task = "%s"""".printf(this.strip_task(task));
+        string sql = """SELECT id FROM tasks WHERE task = "%s" AND resolved is NULL""".printf(this.strip_task(task));
         int rc = this.db.prepare_v2(sql, sql.length, out stmt);
         if (rc != Sqlite.OK) {
             GLib.stderr.printf("Database Error");
@@ -566,5 +572,43 @@ public class Storage : GLib.Object {
         }
 
         return (data.length == 0) ? false : true;
+    }
+
+    public Task get_task(int id) {
+        Statement stmt;
+        Task[] tasks = {};
+
+        string sql = """SELECT task FROM tasks WHERE id = %d""".printf(id);
+
+        int rc = this.db.prepare_v2(sql, sql.length, out stmt);
+        if (rc != Sqlite.OK) {
+            GLib.stderr.printf("Error while selecting data...");
+
+        }
+
+        if (stmt.step() != Sqlite.ROW) {
+            Task t = new Task(0, "");
+            tasks += t;
+        }
+        else {
+            while (stmt.step() == Sqlite.ROW) {
+                string task_str = stmt.column_text(0);
+                if (task_str == "") {
+                    stdout.printf("NULL!");
+                }
+
+                stdout.printf("Task str: %s\n", task_str);
+
+                Task t = new Task(id, task_str);
+                tasks += t;
+            }
+        }
+
+        if (tasks.length == 0) {
+            Task t = new Task(0, "");
+            tasks += t;
+        }
+
+        return tasks[0];
     }
 }
