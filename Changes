@@ -1,1 +1,9 @@
 2014-03-11 	First release
+
+2014-04-11  1.0
+            + Add real #id to tasks list
+            + Added new mark for resolved tasks
+            * Improved usage info
+            * Improved mark/unmark command interface
+            * A lot of bugfixes
+
